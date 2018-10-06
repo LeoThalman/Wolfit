@@ -24,6 +24,7 @@ def pretty_date(time=False):
     """
     now = datetime.utcnow()
 
+    diff = now - now
     if isinstance(time, datetime):
         diff = now - time
 

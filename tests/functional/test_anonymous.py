@@ -74,12 +74,30 @@ class TestAnonymousUser(TestLiveServer):
         single_post.timestamp = single_post.timestamp - timedelta(seconds=40)
         assert "seconds ago" in single_post.pretty_timestamp()
 
+    def test_posts_pretty_date_a_minute_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(seconds=100)
+        assert single_post.pretty_timestamp() == "a minute ago"
+
+
     def test_posts_pretty_date_minutes_ago(
         self, client, test_user, single_post
     ):
         single_post.timestamp = single_post.timestamp - timedelta(seconds=140)
         assert single_post.pretty_timestamp() == "2 minutes ago"
 
+    def test_posts_pretty_date_an_hour_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(seconds=7000)
+        assert single_post.pretty_timestamp() == "an hour ago"
+
+    def test_posts_pretty_date_hours_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(seconds=7400)
+        assert single_post.pretty_timestamp() == "2 hours ago"
 
     def test_posts_pretty_date_days_ago(
         self, client, test_user, single_post
