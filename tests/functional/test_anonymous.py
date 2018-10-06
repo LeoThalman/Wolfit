@@ -49,3 +49,45 @@ class TestAnonymousUser(TestLiveServer):
         self.wait_for_element(client, "nav-login-link", "Login")
         recent_post_link = client.browser.find_element_by_id("post-0-link")
         assert p.title in recent_post_link.text
+
+    def test_posts_pretty_date_yesterday(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(hours=26)
+        assert single_post.pretty_timestamp() == "Yesterday"
+
+    def test_posts_pretty_date_just_about_now(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(days=(-1))
+        assert single_post.pretty_timestamp() == "just about now"
+
+        def test_posts_pretty_date_about_now(
+            self, client, test_user, single_post
+        ):
+            single_post.timestamp = single_post.timestamp - timedelta(seconds=(-2))
+            assert single_post.pretty_timestamp() == "about now"
+
+    def test_posts_pretty_date_days_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(hours=50)
+        assert single_post.pretty_timestamp() == "2 days ago"
+
+    def test_posts_pretty_date_weeks_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(days=8)
+        assert single_post.pretty_timestamp() == "1 weeks ago"
+
+    def test_posts_pretty_date_months_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(days=40)
+        assert single_post.pretty_timestamp() == "1 months ago"
+
+    def test_posts_pretty_date_years_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(days=400)
+        assert single_post.pretty_timestamp() == "1 years ago"
