@@ -126,6 +126,61 @@ def test_register_should_create_a_new_user(client):
     u = db.session.query(User).filter_by(username="john").one()
     assert u.email == "john@beatles.com"
 
+def test_register_used_name_should_not_add(client):
+    response = client.post(
+        url_for("register"),
+        data=dict(
+            username="john",
+            email="john@beatles.com",
+            password=PASSWORD,
+            password2=PASSWORD,
+        ),
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+    response = client.post(
+        url_for("register"),
+        data=dict(
+            username="john",
+            email="john2@beatles.com",
+            password=PASSWORD,
+            password2=PASSWORD,
+        ),
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+    u = db.session.query(User).filter_by(email="john2@beatles.com").first()
+    assert u is None
+
+def test_register_used_email_should_not_add(client):
+    response = client.post(
+        url_for("register"),
+        data=dict(
+            username="john",
+            email="john@beatles.com",
+            password=PASSWORD,
+            password2=PASSWORD,
+        ),
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+    response = client.post(
+        url_for("register"),
+        data=dict(
+            username="john2",
+            email="john@beatles.com",
+            password=PASSWORD,
+            password2=PASSWORD,
+        ),
+        follow_redirects=True,
+    )
+    assert response.status_code == 200
+
+    u = db.session.query(User).filter_by(username="john2").first()
+    assert u is None
 
 def test_user_should_have_a_profile_page(client, test_user):
     login(client, test_user.username, PASSWORD)
