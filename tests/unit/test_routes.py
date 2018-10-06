@@ -137,6 +137,21 @@ def test_success_if_user_is_logged_in_on_up_vote(client,test_user,single_post):
     assert response.status_code == 302
     assert "/index" in response.headers["Location"]
 
+def test_redirect_if_not_logged_in_on_comment_up_vote(client,single_post_with_comment):
+    c = single_post_with_comment.comments[0]
+    response = client.get(url_for("up_vote_comment", id=c.id ) )
+    assert response.status_code == 302
+    assert "/login" in response.headers["Location"]
+
+def test_redirect_if_logged_in_on_comment_up_vote(client,test_user,single_post_with_comment):
+    c = single_post_with_comment.comments[0]
+    login(client, test_user.username, PASSWORD)
+    response = client.get(url_for("up_vote_comment", id=c.id ) )
+    assert response.status_code == 302
+    assert "/index" in response.headers["Location"]
+
+
+
 def test_register_should_create_a_new_user(client):
     response = client.post(
         url_for("register"),
