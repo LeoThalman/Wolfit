@@ -310,6 +310,15 @@ def test_comments_are_shown_after_post(client, test_user, single_post_with_comme
     response = client.get(url_for("post", id=single_post_with_comment.id))
     assert single_post_with_comment.comments[0].body.encode() in response.data
 
+def test_post_form_validates_redirects_when_not_logged_in(client, test_user, single_post_with_comment):
+    response = client.post(url_for("post", id=single_post_with_comment.id))
+    assert "/login" in response.headers["Location"]
+
+def test_post_form_validates_redirects_when_logged_in(client, test_user, single_post_with_comment):
+    login(client, test_user.username, PASSWORD)
+    response = client.post(url_for("post", id=single_post_with_comment.id))
+    assert "/post" in response.headers["Location"]
+
 
 def test_number_of_comments_for_posts_shown_on_list(client, test_user, single_post):
     single_post.add_comment("Important insight!", test_user)
