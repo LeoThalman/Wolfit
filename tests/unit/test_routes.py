@@ -105,6 +105,12 @@ def test_there_should_be_a_place_for_new_users_to_register(client):
     assert response.status_code == 200
     assert b"Register" in response.data
 
+def test_logged_in_user_redirect_on_register(client, test_user):
+    login(client, test_user.username, PASSWORD)
+    response = client.post(url_for("register"))
+    assert response.status_code == 302
+    assert "/index" in response.headers["Location"]
+
 
 def test_should_be_a_link_to_register_if_not_logged_in(client):
     response = client.get(url_for("login"))
