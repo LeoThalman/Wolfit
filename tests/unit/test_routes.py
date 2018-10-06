@@ -115,6 +115,11 @@ def test_should_be_a_link_to_register_if_not_logged_in(client):
     response = client.get(url_for("login"))
     assert b"Register" in response.data
 
+def test_redirect_if_user_is_not_logged_in_on_create_post(client):
+    response = client.get(url_for("create_post") )
+    assert response.status_code == 302
+    assert "/register" in response.headers["Location"]
+
 def test_redirect_if_user_is_not_logged_in_on_down_vote(client,single_post):
     response = client.get(url_for("down_vote", id=single_post.id ) )
     assert response.status_code == 302
@@ -147,6 +152,19 @@ def test_redirect_if_logged_in_on_comment_up_vote(client,test_user,single_post_w
     c = single_post_with_comment.comments[0]
     login(client, test_user.username, PASSWORD)
     response = client.get(url_for("up_vote_comment", id=c.id ) )
+    assert response.status_code == 302
+    assert "/index" in response.headers["Location"]
+
+def test_redirect_if_not_logged_in_on_comment_down_vote(client,single_post_with_comment):
+    c = single_post_with_comment.comments[0]
+    response = client.get(url_for("down_vote_comment", id=c.id ) )
+    assert response.status_code == 302
+    assert "/login" in response.headers["Location"]
+
+def test_redirect_if_logged_in_on_comment_down_vote(client,test_user,single_post_with_comment):
+    c = single_post_with_comment.comments[0]
+    login(client, test_user.username, PASSWORD)
+    response = client.get(url_for("down_vote_comment", id=c.id ) )
     assert response.status_code == 302
     assert "/index" in response.headers["Location"]
 
