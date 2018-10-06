@@ -116,6 +116,10 @@ def test_should_be_a_link_to_register_if_not_logged_in(client):
     response = client.get(url_for("login"))
     assert b"Register" in response.data
 
+def test_redirect_if_user_is_not_logged_in_on_down_vote(client,single_post):
+    response = client.get(url_for("down_vote", id=single_post.id ) )
+    assert response.status_code == 302
+    assert "/login" in response.headers["Location"]
 
 def test_register_should_create_a_new_user(client):
     response = client.post(
