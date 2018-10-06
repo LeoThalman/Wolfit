@@ -62,11 +62,24 @@ class TestAnonymousUser(TestLiveServer):
         single_post.timestamp = single_post.timestamp - timedelta(days=(-1))
         assert single_post.pretty_timestamp() == "just about now"
 
-        def test_posts_pretty_date_about_now(
-            self, client, test_user, single_post
-        ):
-            single_post.timestamp = single_post.timestamp - timedelta(seconds=(-2))
-            assert single_post.pretty_timestamp() == "about now"
+    def test_posts_pretty_date_about_now(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(seconds=3)
+        assert single_post.pretty_timestamp() == "just now"
+
+    def test_posts_pretty_date_seconds_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(seconds=40)
+        assert "seconds ago" in single_post.pretty_timestamp()
+
+    def test_posts_pretty_date_minutes_ago(
+        self, client, test_user, single_post
+    ):
+        single_post.timestamp = single_post.timestamp - timedelta(seconds=140)
+        assert single_post.pretty_timestamp() == "2 minutes ago"
+
 
     def test_posts_pretty_date_days_ago(
         self, client, test_user, single_post
