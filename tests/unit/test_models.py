@@ -7,6 +7,16 @@ import requests
 import logging
 from sqlalchemy import exc
 
+def test_activity_log_logs_to_info_when_successful_response(mocker):
+    mocker.patch('logging.info')
+    response = requests.Response()
+    response.status_code = 201
+    u = User(username="robot", email="robot@gmail.com")
+
+    mocker.patch.object(requests, 'post', return_value=response)
+    ActivityLog.log_event(u, "testing success")
+    requests.post.assert_called_once()
+    logging.info.asset_called_once()
 
 def test_activity_log_logs_to_critical_when_failed_response(mocker):
     mocker.patch('logging.critical')
