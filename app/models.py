@@ -10,7 +10,7 @@ import logging
 import os
 import json
 
-URL = os.environ['ACTLOG_URL']
+URL = os.environ.get('ACTLOG_URL')
 
 user_vote = db.Table(
     "user_vote",

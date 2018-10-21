@@ -9,7 +9,7 @@ from sqlalchemy import exc
 import os
 
 def test_activity_log_logs_to_critical_when_exception_occurs(mocker):
-    URL = os.environ['ACTLOG_URL']
+    URL = os.environ.get('ACTLOG_URL')
     mocker.patch('logging.critical')
     response = requests.Response()
     response.status_code = 404
