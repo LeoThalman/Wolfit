@@ -1,9 +1,10 @@
 import pytest
 import textwrap
 from datetime import timedelta
-from app.models import User, Post, Category, Comment
+from app.models import User, Post, Category, Comment, ActivityLog
 from app import db
 from sqlalchemy import exc
+
 
 
 def test_new_user():

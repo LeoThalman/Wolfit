@@ -5,7 +5,12 @@ from flask_login import UserMixin
 import markdown
 from app import db, login
 from app.helpers import pretty_date
+import requests
+import logging
+import os
+import json
 
+URL = os.environ['ACTLOG_URL']
 
 user_vote = db.Table(
     "user_vote",
@@ -175,18 +180,22 @@ class ActivityLog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     details = db.Column(db.Text)
 
-    def __repr__(self):
-        return f"<ActivityLog id {self.id} - {self.details[:20]}>" #pragma: no cover
-
     @classmethod
-    def latest_entry(cls):
-        return cls.query.order_by(ActivityLog.id.desc()).first()
-
-    @classmethod
-    def log_event(cls, user_id, details):
-        e = cls(user_id=user_id, details=details)
-        db.session.add(e)
-        db.session.commit()
+    def log_event(cls, user, details):
+        post_url = URL + "/api/activities"
+        activity = {
+        "user_id" : user.id,
+        "username": user.username,
+        "details": details
+        }
+        try:
+            r = requests.post(post_url, json=activity)
+            if r.status_code == 201:
+                logging.info(f"Post activity SUCCESS at {post_url}")
+            else:
+                logging.critical(f"Post activity FAILURE: {r.text}")
+        except requests.exceptions.RequestException:
+            logging.critical(f"Could not connect to activity log service at {URL}")
 
 
 @login.user_loader

@@ -52,7 +52,7 @@ def login():
             flash("Invalid username or password")
             return redirect(url_for("login"))
         login_user(user, remember=form.remember_me.data)
-        ActivityLog.log_event(user.id, f"Login {user}")
+        ActivityLog.log_event(user, f"Login {user}")
         return redirect(url_for("index"))
     elif form.is_submitted():
         return redirect(url_for("login"))
@@ -64,7 +64,7 @@ def login():
 
 @app.route("/logout")
 def logout():
-    ActivityLog.log_event(current_user.id, f"Logout {current_user}")
+    ActivityLog.log_event(current_user, f"Logout {current_user}")
     logout_user()
     return redirect(url_for("index"))
 
@@ -95,7 +95,7 @@ def create_post():
         )
         db.session.add(post)
         db.session.commit()
-        ActivityLog.log_event(current_user.id, f"Create: {post}")
+        ActivityLog.log_event(current_user, f"Create: {post}")
         flash("Your post is now live!")
         return redirect(url_for("index"))
     return render_template(
@@ -116,7 +116,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        ActivityLog.log_event(user.id, "Register")
+        ActivityLog.log_event(user, "Register")
         flash("Congratulations, you are now a registered user!")
         return redirect(url_for("login"))
     return render_template(
@@ -181,7 +181,7 @@ def up_vote(id):
     if current_user.is_authenticated:
         post = Post.query.filter_by(id=id).first_or_404()
         post.up_vote(current_user)
-        ActivityLog.log_event(current_user.id, f"Up Vote: {post}")
+        ActivityLog.log_event(current_user, f"Up Vote: {post}")
         return redirect(next or url_for("index"))
     else:
         return redirect(url_for("login"))
@@ -193,7 +193,7 @@ def down_vote(id):
     if current_user.is_authenticated:
         post = Post.query.filter_by(id=id).first_or_404()
         post.down_vote(current_user)
-        ActivityLog.log_event(current_user.id, f"Down Vote: {post}")
+        ActivityLog.log_event(current_user, f"Down Vote: {post}")
         return redirect(next or url_for("index"))
     else:
         return redirect(url_for("login"))
@@ -205,7 +205,7 @@ def up_vote_comment(id):
     if current_user.is_authenticated:
         comment = Comment.query.filter_by(id=id).first_or_404()
         comment.up_vote(current_user)
-        ActivityLog.log_event(current_user.id, f"Up Vote: {comment}")
+        ActivityLog.log_event(current_user, f"Up Vote: {comment}")
         return redirect(next or url_for("index"))
     else:
         return redirect(url_for("login"))
@@ -217,7 +217,7 @@ def down_vote_comment(id):
     if current_user.is_authenticated:
         comment = Comment.query.filter_by(id=id).first_or_404()
         comment.down_vote(current_user)
-        ActivityLog.log_event(current_user.id, f"Down Vote: {comment}")
+        ActivityLog.log_event(current_user, f"Down Vote: {comment}")
         return redirect(next or url_for("index"))
     else:
         return redirect(url_for("login"))

@@ -348,35 +348,6 @@ def test_single_comment_should_have_link_to_voting(
     )
 
 
-def test_new_post_should_create_activity_log(client, test_user, default_category):
-    login(client, test_user.username, PASSWORD)
-    title = "Logged post title"
-    response = client.post(url_for("create_post"), data=dict(
-        title=title,
-        body='',
-        category_id=default_category.id,
-        user_id=test_user.id
-    ), follow_redirects=True)
-    assert response.status_code == 200
-    e = ActivityLog.latest_entry()
-    assert e is not None
-    assert title in e.details
-    assert test_user.id == e.user_id
-
-
-def test_login_and_logout_create_activity_log(client, test_user):
-    login(client, test_user.username, PASSWORD)
-    e = ActivityLog.latest_entry()
-    assert e is not None
-    assert "Login" in e.details
-    assert test_user.id == e.user_id
-    logout(client)
-    e = ActivityLog.latest_entry()
-    assert e is not None
-    assert "Logout" in e.details
-    assert test_user.id == e.user_id
-
-
 def test_category_page_should_have_link_to_create_post(
     client, test_user, default_category
 ):
