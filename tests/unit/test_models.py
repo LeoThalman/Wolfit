@@ -6,6 +6,22 @@ from app import db
 import requests
 import logging
 from sqlalchemy import exc
+import os
+
+def test_activity_log_logs_to_critical_when_exception_occurs(mocker):
+    URL = os.environ['ACTLOG_URL']
+    mocker.patch('logging.critical')
+    response = requests.Response()
+    response.status_code = 404
+    u = User(username="robot", email="robot@gmail.com")
+
+    mocker.patch.object(
+            requests,
+            'post',
+            side_effect=requests.exceptions.RequestException)
+    ActivityLog.log_event(u, "testing success")
+    requests.post.assert_called_once()
+    logging.critical.asset_called_once_with(f"Could not connect to activity log service at {URL}")
 
 def test_activity_log_logs_to_info_when_successful_response(mocker):
     mocker.patch('logging.info')
@@ -16,7 +32,7 @@ def test_activity_log_logs_to_info_when_successful_response(mocker):
     mocker.patch.object(requests, 'post', return_value=response)
     ActivityLog.log_event(u, "testing success")
     requests.post.assert_called_once()
-    logging.info.asset_called_once()
+    logging.info.asset_called_once_with(f"Post activity SUCCESS at ")
 
 def test_activity_log_logs_to_critical_when_failed_response(mocker):
     mocker.patch('logging.critical')
@@ -27,7 +43,7 @@ def test_activity_log_logs_to_critical_when_failed_response(mocker):
     mocker.patch.object(requests, 'post', return_value=response)
     ActivityLog.log_event(u, "testing fail")
     requests.post.assert_called_once()
-    logging.critical.asset_called_once()
+    logging.critical.asset_called_once_with(f"Post activity FAILURE: ")
 
 def test_new_user():
     """
