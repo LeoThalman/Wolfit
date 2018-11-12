@@ -1,6 +1,7 @@
 *.pyc
 dev.settings
 test.settings
+prod.settings
 test.env
 /.pytest_cache/
 .coverage
