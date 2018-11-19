@@ -193,7 +193,7 @@ class ActivityLog(db.Model):
             else:
                 logging.critical(f"Post activity FAILURE: {r.text}")
         except requests.exceptions.RequestException:
-            logging.critical(f"Could not connect to activity log service at {URL}")
+            logging.critical(f"Could not connect to activity log service at {url}")
 
     @classmethod
     def log_event(cls, user, details):

@@ -1,4 +1,5 @@
 *.pyc
+*.rdb
 dev.settings
 test.settings
 prod.settings

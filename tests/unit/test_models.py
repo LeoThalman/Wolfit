@@ -1,6 +1,6 @@
 import pytest
 import textwrap
-from datetime import timedelta
+from datetime import timedelta, datetime
 from app.models import User, Post, Category, Comment, ActivityLog
 from app import db
 import requests
@@ -15,11 +15,18 @@ def test_activity_log_logs_to_critical_when_exception_occurs(mocker):
     response.status_code = 404
     u = User(username="robot", email="robot@gmail.com")
 
+    act = {
+    "user_id" : u.id,
+    "username": u.username,
+    "timestamp": str(datetime.utcnow()),
+    "details": "testing success"
+    }
+
     mocker.patch.object(
             requests,
             'post',
             side_effect=requests.exceptions.RequestException)
-    ActivityLog.log_event(u, "testing success")
+    ActivityLog.post_activity(act)
     requests.post.assert_called_once()
     logging.critical.asset_called_once_with(f"Could not connect to activity log service at {URL}")
 
@@ -29,8 +36,15 @@ def test_activity_log_logs_to_info_when_successful_response(mocker):
     response.status_code = 201
     u = User(username="robot", email="robot@gmail.com")
 
+    act = {
+    "user_id" : u.id,
+    "username": u.username,
+    "timestamp": str(datetime.utcnow()),
+    "details": "testing success"
+    }
+
     mocker.patch.object(requests, 'post', return_value=response)
-    ActivityLog.log_event(u, "testing success")
+    ActivityLog.post_activity(act)
     requests.post.assert_called_once()
     logging.info.asset_called_once_with(f"Post activity SUCCESS at ")
 
@@ -40,8 +54,15 @@ def test_activity_log_logs_to_critical_when_failed_response(mocker):
     response.status_code = 404
     u = User(username="robot", email="robot@gmail.com")
 
+    act = {
+    "user_id" : u.id,
+    "username": u.username,
+    "timestamp": str(datetime.utcnow()),
+    "details": "testing fail"
+    }
+
     mocker.patch.object(requests, 'post', return_value=response)
-    ActivityLog.log_event(u, "testing fail")
+    ActivityLog.post_activity(act)
     requests.post.assert_called_once()
     logging.critical.asset_called_once_with(f"Post activity FAILURE: ")
 
