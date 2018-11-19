@@ -21,7 +21,7 @@ markdown = "*"
 flask-bootstrap = "*"
 python-dotenv = "*"
 pytest-mock = "*"
-celery = "*"
+celery = {version = "*", extras = ["redis"]}
 
 [dev-packages]
 

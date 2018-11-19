@@ -2,6 +2,7 @@ from datetime import datetime
 from dateutil import tz
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
+from celery import Celery
 import markdown
 from app import db, login
 from app.helpers import pretty_date
@@ -10,7 +11,8 @@ import logging
 import os
 import json
 
-URL = os.environ.get('ACTLOG_URL')
+url = os.getenv('ACTLOG_URL')
+celery = Celery('app.models', backend='redis://localhost', broker='redis://localhost')
 
 user_vote = db.Table(
     "user_vote",
@@ -180,14 +182,10 @@ class ActivityLog(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     details = db.Column(db.Text)
 
-    @classmethod
-    def log_event(cls, user, details):
-        post_url = URL + "/api/activities"
-        activity = {
-        "user_id" : user.id,
-        "username": user.username,
-        "details": details
-        }
+    @celery.task
+    def post_activity(activity):
+
+        post_url = url + "/api/activities"
         try:
             r = requests.post(post_url, json=activity)
             if r.status_code == 201:
@@ -196,6 +194,17 @@ class ActivityLog(db.Model):
                 logging.critical(f"Post activity FAILURE: {r.text}")
         except requests.exceptions.RequestException:
             logging.critical(f"Could not connect to activity log service at {URL}")
+
+    @classmethod
+    def log_event(cls, user, details):
+        activity = {
+        "user_id" : user.id,
+        "username": user.username,
+        "timestamp": str(datetime.utcnow()),
+        "details": details
+        }
+        ActivityLog.post_activity.delay(activity)
+
 
 
 @login.user_loader
